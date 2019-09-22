@@ -20,6 +20,7 @@
           <ion-item
             *ngFor="let offer of offers"
             [routerLink]="['/', 'places', 'tabs', 'offers', 'offer.id']"
+            button
           >
             <ion-thumbnail slot="start">
               <ion-img [src]="offer?.imageUrl"></ion-img>
