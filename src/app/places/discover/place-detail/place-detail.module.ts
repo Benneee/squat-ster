@@ -1,3 +1,4 @@
+import { BookSpotComponent } from './../../../bookings/book-spot/book-spot.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +22,7 @@ const routes: Routes = [
     IonicModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [PlaceDetailPage]
+  declarations: [PlaceDetailPage, BookSpotComponent],
+  entryComponents: [BookSpotComponent]
 })
 export class PlaceDetailPageModule {}
