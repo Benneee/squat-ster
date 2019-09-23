@@ -36,7 +36,25 @@ export class PlaceDetailPage implements OnInit {
   onBookPlace() {
     // this.navCtrl.navigateBack('/places/tabs/discover');
     this.modalCtrl
-      .create({ component: BookSpotComponent })
-      .then(modal => modal.present());
+      .create({
+        component: BookSpotComponent,
+        componentProps: { selectedPlace: this.place }
+      })
+      .then(modal => {
+        modal.present();
+        modal.onDidDismiss().then(dataFromModal => {
+          console.log(dataFromModal.data, dataFromModal.role);
+          if (dataFromModal.role === 'confirm') {
+            console.log('Booked!');
+          }
+        });
+      });
   }
 }
+
+/**
+ * onDidDismiss
+ * This method helps us interact with the data being sent back from the modal
+ * It returns a promise, which will help us chain another then block
+ * to the existing then block and then use the data coming from the modal
+ */
