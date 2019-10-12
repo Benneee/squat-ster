@@ -8,6 +8,13 @@
 </ion-header>
 
 <ion-content>
+  <ion-segment (ionChange)="onFilterPlaces($event)" class="ion-padding">
+    <ion-segment-button value="all" checked>All SquatSpots</ion-segment-button>
+    <ion-segment-button value="bookable"
+      >Bookable SquatSpots</ion-segment-button
+    >
+  </ion-segment>
+
   <ion-grid>
     <ion-row>
       <ion-col size="12" size-sm="8" offset-sm="2" class="ion-text-center">
