@@ -1,3 +1,4 @@
+import { OfferItemComponent } from './offer-item/offer-item.component';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +22,6 @@ const routes: Routes = [
     IonicModule,
     RouterModule.forChild(routes)
   ],
-  declarations: [OffersPage]
+  declarations: [OfferItemComponent, OffersPage]
 })
 export class OffersPageModule {}
