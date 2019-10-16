@@ -2,6 +2,7 @@ import { AuthService } from './auth.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { LoadingController } from '@ionic/angular';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-auth',
@@ -18,8 +19,9 @@ export class AuthPage implements OnInit {
 
   ngOnInit() {}
 
-  onLogin() {
+  onLogin(authForm: NgForm) {
     this.isLoading = true;
+    console.log('values: ', authForm);
     this.loadingCtrl
       .create({
         keyboardClose: true,
