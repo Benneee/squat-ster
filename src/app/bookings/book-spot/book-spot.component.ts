@@ -9,6 +9,7 @@ import { ModalController } from '@ionic/angular';
 })
 export class BookSpotComponent implements OnInit {
   @Input() selectedPlace: Place;
+  @Input() selectedDateMode: string;
 
   constructor(private modalCtrl: ModalController) {}
 
