@@ -1,6 +1,7 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, ViewChild } from '@angular/core';
 import { Place } from 'src/app/places/place.model';
 import { ModalController } from '@ionic/angular';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-book-spot',
@@ -10,6 +11,7 @@ import { ModalController } from '@ionic/angular';
 export class BookSpotComponent implements OnInit {
   @Input() selectedPlace: Place;
   @Input() selectedDateMode: 'select' | 'random';
+  @ViewChild('bookPlace', { static: true }) bookingForm: NgForm;
   startDate: string;
   endDate: string;
 
@@ -54,9 +56,26 @@ export class BookSpotComponent implements OnInit {
   }
 
   onBookPlace() {
+    if (!this.bookingForm.valid || !this.isValidDate()) {
+      return;
+    }
     this.modalCtrl.dismiss(
-      { message: `Booked ${this.selectedPlace.title}` },
+      {
+        bookingData: {
+          firstName: this.bookingForm.value['first-name'],
+          lastName: this.bookingForm.value['last-name'],
+          guestNumber: this.bookingForm.value['guest-number'],
+          startDate: this.bookingForm.value['date-from'],
+          endDate: this.bookingForm.value['date-to']
+        }
+      },
       'confirm'
     );
+  }
+
+  isValidDate() {
+    const startDate = new Date(this.bookingForm.value['date-from']);
+    const endDate = new Date(this.bookingForm.value['date-to']);
+    return endDate > startDate;
   }
 }
