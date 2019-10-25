@@ -9,11 +9,35 @@ import { ModalController } from '@ionic/angular';
 })
 export class BookSpotComponent implements OnInit {
   @Input() selectedPlace: Place;
-  @Input() selectedDateMode: string;
+  @Input() selectedDateMode: 'select' | 'random';
+  startDate: string;
+  endDate: string;
 
   constructor(private modalCtrl: ModalController) {}
 
-  ngOnInit() {}
+  ngOnInit() {
+    // To enable random date selection
+    const availableFrom = new Date(this.selectedPlace.availableFrom);
+    const availableTo = new Date(this.selectedPlace.availableTo);
+
+    if (this.selectedDateMode === 'random') {
+      this.startDate = new Date(
+        availableFrom.getTime() +
+          Math.random() *
+            (availableTo.getTime() -
+              7 * 24 * 60 * 60 * 1000 -
+              availableFrom.getTime())
+      ).toISOString();
+
+      this.endDate = new Date(
+        new Date(this.startDate).getTime() +
+          Math.random() *
+            (new Date(this.startDate).getTime() +
+              6 * 24 * 60 * 60 * 1000 -
+              new Date(this.startDate).getTime())
+      ).toISOString();
+    }
+  }
   /**
    * .dismiss() method closes the modal
    * If there are multiple modals in this component, we can pass an ID representing the
