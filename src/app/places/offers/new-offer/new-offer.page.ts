@@ -2,6 +2,7 @@ import { PlacesService } from './../../places.service';
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { LoadingController } from '@ionic/angular';
 
 @Component({
   selector: 'app-new-offer',
@@ -9,7 +10,7 @@ import { Router } from '@angular/router';
   styleUrls: ['./new-offer.page.scss']
 })
 export class NewOfferPage implements OnInit {
-  constructor(private placesServices: PlacesService, private router: Router) {}
+  constructor(private placesServices: PlacesService, private router: Router, private loadingCtrl: LoadingController) {}
   newOfferForm: FormGroup;
   ngOnInit() {
     this.createForm();
@@ -19,16 +20,23 @@ export class NewOfferPage implements OnInit {
     if (!this.newOfferForm.valid) {
       return;
     }
-    this.placesServices.addPlace(
-      this.controls.title,
-      this.controls.descr,
-      +this.controls.price,
-      new Date(this.controls.date_from),
-      new Date(this.controls.date_to)
-    );
-    console.log('Place added!');
-    this.newOfferForm.reset();
-    this.router.navigate(['/places/tabs/offers']);
+
+    this.loadingCtrl.create({
+      message: 'Creating squat-spot...'
+    }).then(loader => {
+      loader.present();
+      this.placesServices.addPlace(
+          this.controls.title,
+          this.controls.descr,
+          +this.controls.price,
+          new Date(this.controls.date_from),
+          new Date(this.controls.date_to)
+        ).subscribe(() => {
+          loader.dismiss();
+          this.newOfferForm.reset();
+          this.router.navigate(['/places/tabs/offers']);
+      });
+    });
   }
 
   private createForm() {

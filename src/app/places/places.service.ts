@@ -2,7 +2,7 @@ import { AuthService } from './../auth/auth.service';
 import { Place } from './place.model';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { take, map } from 'rxjs/operators';
+import { take, map, tap, delay } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -92,8 +92,16 @@ export class PlacesService {
     );
     // this._places.push(newPlace);
     // take allows us to get the current latest version of our places array
-    this.places.pipe(take(1)).subscribe(places => {
-      this._places.next(places.concat(newPlace));
-    });
+
+    // Since we want to show a loader here, we use the tap operator to make sure the
+    // asynchronous process here is incomplete as subscribe will complete the process
+    return this.places.pipe(
+      take(1),
+      // Fake a delay
+      delay(2000),
+      tap(places => {
+        this._places.next(places.concat(newPlace));
+      })
+    );
   }
 }
