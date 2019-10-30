@@ -7,12 +7,12 @@
     <div class="offer-details">
       <ion-icon name="calendar" color="tertiary"></ion-icon>
       <ion-text color="primary" class="space-left" color="dark">{{
-        getDummyDate() | date
+        offer?.availableFrom | date
       }}</ion-text>
       <span class="space-left">to</span>
       <ion-icon name="calendar" class="space-left" color="tertiary"></ion-icon>
       <ion-text color="primary" class="space-left" color="dark">{{
-        getDummyDate() | date
+        offer?.availableTo | date
       }}</ion-text>
     </div>
   </ion-label>
