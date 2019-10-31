@@ -29,7 +29,7 @@ export class PlacesService {
       15999,
       new Date('2019-01-01'),
       new Date('2019-12-31'),
-      'def'
+      'abc'
     ),
     new Place(
       'p3',
@@ -39,7 +39,7 @@ export class PlacesService {
       11999,
       new Date('2019-01-01'),
       new Date('2019-12-31'),
-      'xyz'
+      'abc'
     ),
     new Place(
       'p4',
@@ -49,7 +49,7 @@ export class PlacesService {
       19999,
       new Date('2019-01-01'),
       new Date('2019-12-31'),
-      'mno'
+      'abc'
     )
   ]);
 
@@ -101,6 +101,40 @@ export class PlacesService {
       delay(2000),
       tap(places => {
         this._places.next(places.concat(newPlace));
+      })
+    );
+  }
+
+  updatePlace(placeId: string, title: string, description: string) {
+    return this.places.pipe(
+      take(1),
+      delay(2000),
+      tap(places => {
+        // Get the id of the place we intend to update
+        const updatedPlaceIndex = places.findIndex(
+          place => place.id === placeId
+        );
+
+        // Get all of the pre-existing places and assign to this variable
+        const allPlaces = [...places];
+
+        // Use the index of the place we intend to change to get it from the allPlaces array
+        const oldPlace = allPlaces[updatedPlaceIndex];
+
+        // Change it by overwriting its content with the arguments passed into this method
+        allPlaces[updatedPlaceIndex] = new Place(
+          oldPlace.id,
+          title,
+          description,
+          oldPlace.imageUrl,
+          oldPlace.price,
+          oldPlace.availableFrom,
+          oldPlace.availableTo,
+          oldPlace.userId
+        );
+
+        // Emit the latest places list
+        this._places.next(allPlaces);
       })
     );
   }
