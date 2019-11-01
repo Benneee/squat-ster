@@ -64,9 +64,9 @@ export class BookSpotComponent implements OnInit {
         bookingData: {
           firstName: this.bookingForm.value['first-name'],
           lastName: this.bookingForm.value['last-name'],
-          guestNumber: this.bookingForm.value['guest-number'],
-          startDate: this.bookingForm.value['date-from'],
-          endDate: this.bookingForm.value['date-to']
+          guestNumber: +this.bookingForm.value['guest-number'],
+          startDate: new Date(this.bookingForm.value['date-from']),
+          endDate: new Date(this.bookingForm.value['date-to'])
         }
       },
       'confirm'

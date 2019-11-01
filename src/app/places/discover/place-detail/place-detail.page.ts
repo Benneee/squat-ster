@@ -1,10 +1,12 @@
+import { BookingService } from './../../../bookings/booking.service';
 import { BookSpotComponent } from './../../../bookings/book-spot/book-spot.component';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
   NavController,
   ModalController,
-  ActionSheetController
+  ActionSheetController,
+  LoadingController
 } from '@ionic/angular';
 import { PlacesService } from '../../places.service';
 import { Place } from '../../place.model';
@@ -23,7 +25,9 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
     private placesService: PlacesService,
     private route: ActivatedRoute,
     private modalCtrl: ModalController,
-    private actionSheetCtrl: ActionSheetController
+    private actionSheetCtrl: ActionSheetController,
+    private bookingService: BookingService,
+    private loadingCtrl: LoadingController
   ) {}
 
   ngOnInit() {
@@ -86,7 +90,28 @@ export class PlaceDetailPage implements OnInit, OnDestroy {
         modal.onDidDismiss().then(dataFromModal => {
           console.log(dataFromModal.data, dataFromModal.role);
           if (dataFromModal.role === 'confirm') {
-            console.log('Booked!');
+            this.loadingCtrl
+              .create({
+                message: 'Booking squat-spot'
+              })
+              .then(loader => {
+                loader.present();
+                const data = dataFromModal.data.bookingData;
+                this.bookingService
+                  .addBooking(
+                    this.place.id,
+                    this.place.title,
+                    this.place.imageUrl,
+                    data.firstName,
+                    data.lastName,
+                    data.guestNumber,
+                    data.startDate,
+                    data.endDate
+                  )
+                  .subscribe(() => {
+                    loader.dismiss();
+                  });
+              });
           }
         });
       });
