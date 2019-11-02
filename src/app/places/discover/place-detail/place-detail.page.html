@@ -21,7 +21,7 @@
           <ion-card-content>
             <p>{{ place?.description }}</p>
           </ion-card-content>
-          <div>
+          <div *ngIf="isBookable">
             <ion-button
               color="primary"
               class="ion-margin"
