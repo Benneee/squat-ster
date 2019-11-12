@@ -2,13 +2,14 @@ import { AuthService } from './../auth/auth.service';
 import { Place } from './place.model';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { take, map, tap, delay } from 'rxjs/operators';
+import { take, map, tap, delay, switchMap } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlacesService {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private http: HttpClient) {}
 
   private _places = new BehaviorSubject<Place[]>([
     new Place(
@@ -80,7 +81,10 @@ export class PlacesService {
     dateTo: Date,
     imageUrl?: string
   ) {
+    let generatedId: string;
     const newPlace = new Place(
+      // While sending to Firebase, we don't need to add the randomly generated ID as well,
+      // Firebase provides our data with individual IDs
       Math.random().toString(),
       title,
       description,
@@ -95,14 +99,33 @@ export class PlacesService {
 
     // Since we want to show a loader here, we use the tap operator to make sure the
     // asynchronous process here is incomplete as subscribe will complete the process
-    return this.places.pipe(
-      take(1),
-      // Fake a delay
-      delay(2000),
-      tap(places => {
-        this._places.next(places.concat(newPlace));
-      })
-    );
+    return this.http
+      .post<{ name: string }>(
+        'https://squat-ster.firebaseio.com/offered-places.json',
+        {
+          ...newPlace,
+          id: null
+        }
+      )
+      .pipe(
+        switchMap(resData => {
+          generatedId = resData.name;
+          return this.places;
+        }),
+        take(1),
+        tap(places => {
+          newPlace.id = generatedId;
+          this._places.next(places.concat(newPlace));
+        })
+      );
+    // return this.places.pipe(
+    //   take(1),
+    //   // Fake a delay
+    //   delay(2000),
+    //   tap(places => {
+    //     this._places.next(places.concat(newPlace));
+    //   })
+    // );
   }
 
   updatePlace(placeId: string, title: string, description: string) {
