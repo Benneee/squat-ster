@@ -61,6 +61,7 @@ interface PlaceData {
   providedIn: "root"
 })
 export class PlacesService {
+  firebaseUrl = "https://squat-ster.firebaseio.com/offered-places.json";
   constructor(private authService: AuthService, private http: HttpClient) {}
 
   private _places = new BehaviorSubject<Place[]>([]);
@@ -73,44 +74,58 @@ export class PlacesService {
   }
 
   fetchPlaces() {
-    return this.http
-      .get<{ [key: string]: PlaceData }>(
-        "https://squat-ster.firebaseio.com/offered-places.json"
-      )
-      .pipe(
-        map(response => {
-          const places = [];
-          for (const key in response) {
-            if (response.hasOwnProperty(key)) {
-              places.push(
-                new Place(
-                  key,
-                  response[key].title,
-                  response[key].description,
-                  response[key].imageUrl,
-                  response[key].price,
-                  new Date(response[key].availableFrom),
-                  new Date(response[key].availableTo),
-                  response[key].userId
-                )
-              );
-            }
+    return this.http.get<{ [key: string]: PlaceData }>(this.firebaseUrl).pipe(
+      map(response => {
+        const places = [];
+        for (const key in response) {
+          if (response.hasOwnProperty(key)) {
+            places.push(
+              new Place(
+                key,
+                response[key].title,
+                response[key].description,
+                response[key].imageUrl,
+                response[key].price,
+                new Date(response[key].availableFrom),
+                new Date(response[key].availableTo),
+                response[key].userId
+              )
+            );
           }
-          return places;
-        }),
-        tap(places => {
-          this._places.next(places);
-        })
-      );
-  }
-
-  getPlace(id: string) {
-    return this.places.pipe(
-      take(1),
-      map(places => {
-        return { ...places.find(p => p.id === id) };
+        }
+        return places;
+      }),
+      tap(places => {
+        this._places.next(places);
       })
     );
+  }
+
+  getPlace(placeId: string) {
+    // return this.places.pipe(
+    //   take(1),
+    //   map(places => {
+    //     return { ...places.find(p => p.id === id) };
+    //   })
+    // );
+    return this.http
+      .get<PlaceData>(
+        `https://squat-ster.firebaseio.com/offered-places/${placeId}.json`
+      )
+      .pipe(
+        map(placeData => {
+          return new Place(
+            placeId,
+            placeData.title,
+            placeData.description,
+            placeData.imageUrl,
+            placeData.price,
+            new Date(placeData.availableFrom),
+            new Date(placeData.availableTo),
+            placeData.userId
+          );
+        })
+      );
   }
   get userId() {
     return this.authService.userId;
@@ -143,13 +158,10 @@ export class PlacesService {
     // Since we want to show a loader here, we use the tap operator to make sure the
     // asynchronous process here is incomplete as subscribe will complete the process
     return this.http
-      .post<{ name: string }>(
-        "https://squat-ster.firebaseio.com/offered-places.json",
-        {
-          ...newPlace,
-          id: null
-        }
-      )
+      .post<{ name: string }>(this.firebaseUrl, {
+        ...newPlace,
+        id: null
+      })
       .pipe(
         switchMap(resData => {
           generatedId = resData.name;
@@ -161,28 +173,20 @@ export class PlacesService {
           this._places.next(places.concat(newPlace));
         })
       );
-    // return this.places.pipe(
-    //   take(1),
-    //   // Fake a delay
-    //   delay(2000),
-    //   tap(places => {
-    //     this._places.next(places.concat(newPlace));
-    //   })
-    // );
   }
 
   updatePlace(placeId: string, title: string, description: string) {
+    let allPlaces: Place[];
     return this.places.pipe(
       take(1),
-      delay(2000),
-      tap(places => {
+      switchMap(places => {
         // Get the id of the place we intend to update
         const updatedPlaceIndex = places.findIndex(
           place => place.id === placeId
         );
 
         // Get all of the pre-existing places and assign to this variable
-        const allPlaces = [...places];
+        allPlaces = [...places];
 
         // Use the index of the place we intend to change to get it from the allPlaces array
         const oldPlace = allPlaces[updatedPlaceIndex];
@@ -198,8 +202,12 @@ export class PlacesService {
           oldPlace.availableTo,
           oldPlace.userId
         );
-
-        // Emit the latest places list
+        return this.http.put(
+          `https://squat-ster.firebaseio.com/offered-places/${placeId}.json`,
+          { ...allPlaces[updatedPlaceIndex], id: null }
+        );
+      }),
+      tap(() => {
         this._places.next(allPlaces);
       })
     );
