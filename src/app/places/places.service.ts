@@ -1,7 +1,7 @@
 import { AuthService } from "./../auth/auth.service";
 import { Place } from "./place.model";
 import { Injectable } from "@angular/core";
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, of } from "rxjs";
 import { take, map, tap, delay, switchMap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 
@@ -102,12 +102,6 @@ export class PlacesService {
   }
 
   getPlace(placeId: string) {
-    // return this.places.pipe(
-    //   take(1),
-    //   map(places => {
-    //     return { ...places.find(p => p.id === id) };
-    //   })
-    // );
     return this.http
       .get<PlaceData>(
         `https://squat-ster.firebaseio.com/offered-places/${placeId}.json`
@@ -180,19 +174,31 @@ export class PlacesService {
     return this.places.pipe(
       take(1),
       switchMap(places => {
-        // Get the id of the place we intend to update
-        const updatedPlaceIndex = places.findIndex(
+        // Because we are using behavioural subject for our places array
+        // and the places observable is initiated as an empty array, 
+        // We are unable to edit a place at a certain point in time e.g when you refresh
+        // the edit-offer-form. The fix however is to ensure there's always "places"
+        // at every point in time, this is achieved using the following lines
+        if (!places || places.length <= 0) {
+          return this.fetchPlaces();
+        } else {
+          return of(places);
+        }
+      }),
+      switchMap(places => {
+         // Get the id of the place we intend to update
+         const updatedPlaceIndex = places.findIndex(
           place => place.id === placeId
         );
 
         // Get all of the pre-existing places and assign to this variable
-        allPlaces = [...places];
+         allPlaces = [...places];
 
         // Use the index of the place we intend to change to get it from the allPlaces array
-        const oldPlace = allPlaces[updatedPlaceIndex];
+         const oldPlace = allPlaces[updatedPlaceIndex];
 
         // Change it by overwriting its content with the arguments passed into this method
-        allPlaces[updatedPlaceIndex] = new Place(
+         allPlaces[updatedPlaceIndex] = new Place(
           oldPlace.id,
           title,
           description,
@@ -202,7 +208,7 @@ export class PlacesService {
           oldPlace.availableTo,
           oldPlace.userId
         );
-        return this.http.put(
+         return this.http.put(
           `https://squat-ster.firebaseio.com/offered-places/${placeId}.json`,
           { ...allPlaces[updatedPlaceIndex], id: null }
         );
