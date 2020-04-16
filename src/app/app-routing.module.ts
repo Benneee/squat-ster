@@ -4,23 +4,23 @@ import { AuthGuard } from './auth/auth.guard';
 
 const routes: Routes = [
   { path: '', redirectTo: 'places', pathMatch: 'full' },
-  { path: 'auth', loadChildren: './auth/auth.module#AuthPageModule' },
+  { path: 'auth', loadChildren: 'src/app/auth/auth.module#AuthPageModule' },
   {
     path: 'places',
     loadChildren: './places/places.module#PlacesPageModule',
-    canLoad: [AuthGuard]
+    canLoad: [AuthGuard],
   },
   {
     path: 'bookings',
     loadChildren: './bookings/bookings.module#BookingsPageModule',
-    canLoad: [AuthGuard]
-  }
+    canLoad: [AuthGuard],
+  },
 ];
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })
+    RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules }),
   ],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class AppRoutingModule {}
